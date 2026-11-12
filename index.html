@@ -1,213 +1,296 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-world="cultura" class="is-loading">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BG Consultora · Cultura y Liderazgo</title>
-<meta name="description" content="Diagnosticamos tu cultura, ordenamos el liderazgo y acompañamos la adopción de IA, del diagnóstico al plan de acción.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BG Consultora · Valores que se ven</title>
+  <meta name="description" content="Consultora en cultura y liderazgo. Diagnosticamos tu cultura, ordenamos el liderazgo y acompañamos la adopción de IA, del diagnóstico al plan de acción.">
+  <meta name="theme-color" content="#FFF6DA">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='13' height='13' fill='%23e63329'/%3E%3Crect x='17' y='2' width='13' height='13' fill='%23ffc72c'/%3E%3Crect x='2' y='17' width='13' height='13' fill='%237cc6ee'/%3E%3Crect x='17' y='17' width='13' height='13' fill='%232db46e'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="assets/vendor/gsap.min.js" defer></script>
+  <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+  <script src="assets/vendor/lenis.min.js" defer></script>
+  <script src="main.js" defer></script>
 </head>
 <body>
+  <a class="skip" href="#contacto">Ir al contacto</a>
 
-<header class="nav" id="nav">
-  <div class="wrap nav__inner">
-    <a href="#top" class="logo" aria-label="BG Consultora, inicio">
-      <span class="logo__mark"><i class="r"></i><i class="y"></i><i class="b"></i><i class="g"></i></span>
-      <span class="logo__text">BG<small>consultora</small></span>
-    </a>
-    <nav class="nav__links" id="menu">
-      <a href="#servicios">Qué hacemos</a>
-      <a href="#metodo">Cómo trabajamos</a>
-      <a href="#casos">Casos</a>
-      <a href="#equipo">Equipo</a>
-      <a href="#contacto" class="btn btn--yellow btn--sm">Pedir diagnóstico</a>
-    </nav>
-    <button class="nav__toggle" id="toggle" aria-label="Abrir menú" aria-expanded="false"><span></span><span></span></button>
+  <!-- capa 0 · el líquido -->
+  <canvas id="liquid" class="liquid" aria-hidden="true"></canvas>
+
+  <!-- loader -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <span class="loader__fill" id="loaderFill"></span>
+    <span class="loader__label">Diagnosticando</span>
+    <span class="loader__count"><span id="loaderCount">0</span>%</span>
   </div>
-</header>
 
-<main id="top">
+  <header class="nav" id="nav">
+    <a class="brand" href="#top" aria-label="BG Consultora, volver arriba">
+      <span class="brand__mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span class="brand__name">BG</span>
+    </a>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="wrap hero__grid">
-      <div class="hero__copy">
-        <p class="eyebrow eyebrow--yellow reveal">Consultora en cultura y liderazgo</p>
-        <h1 class="hero__title reveal">Los valores de tu empresa <span class="sky">tienen que verse</span> en la práctica.</h1>
-        <p class="hero__lead reveal">Diagnosticamos tu cultura, ordenamos el liderazgo y acompañamos la adopción de IA, del diagnóstico al plan de acción.</p>
-        <div class="hero__ctas reveal">
-          <a href="#contacto" class="btn btn--yellow">Pedir diagnóstico</a>
-          <a href="#servicios" class="btn btn--ghost">Qué hacemos</a>
+    <div class="nav__worlds" role="radiogroup" aria-label="Elegí un frente">
+      <button type="button" role="radio" class="swatch" data-world="cultura" aria-checked="true"><span class="swatch__dot"></span><span class="swatch__name">Cultura</span></button>
+      <button type="button" role="radio" class="swatch" data-world="liderazgo" aria-checked="false" tabindex="-1"><span class="swatch__dot"></span><span class="swatch__name">Liderazgo</span></button>
+      <button type="button" role="radio" class="swatch" data-world="ia" aria-checked="false" tabindex="-1"><span class="swatch__dot"></span><span class="swatch__name">IA</span></button>
+    </div>
+
+    <a class="nav__cta" href="#contacto">Pedir diagnóstico</a>
+  </header>
+
+  <!-- indicador de avance -->
+  <div class="gauge" aria-hidden="true"><span class="gauge__track"><span class="gauge__fill" id="gaugeFill"></span></span></div>
+
+  <!-- capa 2 · la marca, fija mientras se recorre la página -->
+  <div class="stage" id="stage" aria-hidden="true">
+    <div class="stage__rig" id="rig">
+      <div class="mark" id="mark">
+        <div class="mark__tile" data-tile="liderazgo"><span class="mark__tag">Liderazgo</span><span class="mark__txt">Delegar sin microgestionar</span></div>
+        <div class="mark__tile" data-tile="cultura"><span class="mark__tag">Clima</span><span class="mark__txt">El clima no mejora con una acción aislada</span></div>
+        <div class="mark__tile" data-tile="ia"><span class="mark__tag">IA</span><span class="mark__txt">La IA ya llegó. ¿Tu equipo está preparado?</span></div>
+        <div class="mark__tile" data-tile="metodo"><span class="mark__tag">Método</span><span class="mark__txt">Del diagnóstico al plan de acción</span></div>
+      </div>
+      <span class="mark__shadow"></span>
+    </div>
+  </div>
+
+  <main id="top">
+
+    <!-- 0 · HERO -->
+    <section class="scene hero" id="hero" data-level="0.3" aria-labelledby="heroTitle">
+      <h1 class="hero__title" id="heroTitle">
+        <span class="hero__line hero__line--1" data-split>Valores que</span>
+        <span class="hero__line hero__line--2" data-split>se ven.</span>
+      </h1>
+      <div class="hero__meta">
+        <p class="eyebrow">Consultora en cultura y liderazgo<br>Diagnóstico · Liderazgo · IA aplicada</p>
+        <p class="hero__lede">Los valores de tu empresa tienen que verse en la práctica. Diagnosticamos tu cultura, ordenamos el liderazgo y acompañamos la adopción de IA, del diagnóstico al plan de acción.</p>
+      </div>
+      <p class="hero__cue" aria-hidden="true"><span class="hero__cue-line"></span>Bajá para ver</p>
+    </section>
+
+    <!-- 1 · LA DISTANCIA -->
+    <section class="scene gap" id="distancia" data-level="0.5" aria-labelledby="gapTitle">
+      <div class="gap__intro">
+        <p class="eyebrow">01 — El diagnóstico</p>
+        <h2 class="h2" id="gapTitle">Lo escrito y <em>lo vivido.</em></h2>
+        <p class="body">Toda empresa tiene valores en la pared. La pregunta es cuánto se parecen a lo que pasa un lunes a las diez de la mañana.</p>
+      </div>
+
+      <div class="gap__specs">
+        <div class="specs specs--l">
+          <h3 class="label">Lo que dice la pared</h3>
+          <ul>
+            <li class="spec rv"><span class="spec__no">01</span><span class="spec__name">Confianza</span><span class="spec__line"></span></li>
+            <li class="spec rv"><span class="spec__no">02</span><span class="spec__name">Trabajo en equipo</span><span class="spec__line"></span></li>
+            <li class="spec rv"><span class="spec__no">03</span><span class="spec__name">Innovación</span><span class="spec__line"></span></li>
+            <li class="spec rv"><span class="spec__no">04</span><span class="spec__name">Autonomía</span><span class="spec__line"></span></li>
+          </ul>
+        </div>
+        <div class="specs specs--r">
+          <h3 class="label">Lo que pasa el lunes</h3>
+          <ul>
+            <li class="spec rv"><span class="spec__line"></span><span class="spec__name">Líderes que microgestionan</span><span class="spec__no">05</span></li>
+            <li class="spec rv"><span class="spec__line"></span><span class="spec__name">Reuniones sin decisiones</span><span class="spec__no">06</span></li>
+            <li class="spec rv"><span class="spec__line"></span><span class="spec__name">IA usada sin reglas</span><span class="spec__no">07</span></li>
+            <li class="spec rv"><span class="spec__line"></span><span class="spec__name">Un clima que no mejora</span><span class="spec__no">08</span></li>
+          </ul>
         </div>
       </div>
-      <div class="tiles">
-        <a href="#servicios" class="tile tile--red reveal"><span class="tile__tag">Liderazgo</span><strong>Delegar sin microgestionar</strong></a>
-        <a href="#servicios" class="tile tile--yellow reveal"><span class="tile__tag">Clima</span><strong>El clima no mejora con una acción aislada</strong></a>
-        <a href="#servicios" class="tile tile--sky reveal"><span class="tile__tag">IA</span><strong>La IA ya llegó. ¿Tu equipo está preparado?</strong></a>
-        <a href="#metodo" class="tile tile--green reveal"><span class="tile__tag">Método</span><strong>Del diagnóstico al plan de acción</strong></a>
+    </section>
+
+    <!-- 1b · EN NÚMEROS -->
+    <section class="scene numbers" id="numeros" data-level="0.16" aria-labelledby="numTitle">
+      <h3 class="label" id="numTitle">Cómo trabajamos · en números</h3>
+      <dl class="figures">
+        <div class="figure rv"><dt>Etapas</dt><dd>4</dd></div>
+        <div class="figure rv"><dt>Acciones prioritarias</dt><dd>2<small>–3</small></dd></div>
+        <div class="figure rv"><dt>Plan de acción</dt><dd>1</dd></div>
+        <div class="figure rv"><dt>Recetas enlatadas</dt><dd>0</dd></div>
+      </dl>
+      <p class="facts">Encuestas <i>/</i> Entrevistas <i>/</i> Observación <i>/</i> Indicadores acordados desde el inicio</p>
+    </section>
+
+    <!-- 2 · PALABRAS + APERTURA -->
+    <section class="scene words" id="frentes-intro" data-level="1" aria-labelledby="wordsTitle">
+      <div class="words__pin" aria-hidden="true">
+      <div class="marquee">
+        <p class="marquee__row" data-dir="-1">Cultura · Liderazgo · Clima laboral · IA aplicada · Cultura · Liderazgo · Clima laboral · IA aplicada ·</p>
+        <p class="marquee__row" data-dir="1">Diagnóstico · Delegación · Acompañamiento · Plan de acción · Diagnóstico · Delegación · Acompañamiento ·</p>
       </div>
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee__track">
-      <span>Cultura · Liderazgo · Clima laboral · IA aplicada · Diagnóstico · Acompañamiento ·&nbsp;</span>
-      <span>Cultura · Liderazgo · Clima laboral · IA aplicada · Diagnóstico · Acompañamiento ·&nbsp;</span>
-      <span>Cultura · Liderazgo · Clima laboral · IA aplicada · Diagnóstico · Acompañamiento ·&nbsp;</span>
-      <span>Cultura · Liderazgo · Clima laboral · IA aplicada · Diagnóstico · Acompañamiento ·&nbsp;</span>
-    </div>
-  </div>
-
-  <!-- SERVICIOS -->
-  <section class="section" id="servicios">
-    <div class="wrap">
-      <p class="eyebrow eyebrow--red reveal">01 · Qué hacemos</p>
-      <h2 class="h2 reveal">Tres frentes para que<br>la cultura funcione.</h2>
-      <div class="services">
-        <article class="service service--navy reveal">
-          <span class="service__num">Servicio 01</span>
-          <h3>Diagnóstico cultural</h3>
-          <p>Relevamos valores, prácticas y clima para ver qué se vive de verdad en la organización y qué quedó solo escrito.</p>
-          <a href="#contacto" class="service__link">Quiero un diagnóstico →</a>
-        </article>
-        <article class="service service--red reveal">
-          <span class="service__num">Servicio 02</span>
-          <h3>Liderazgo y delegación</h3>
-          <p>Entrenamos a líderes para delegar con confianza, sin microgestionar, y para sostener conversaciones difíciles.</p>
-          <a href="#contacto" class="service__link">Formar a mis líderes →</a>
-        </article>
-        <article class="service service--sky reveal">
-          <span class="service__num">Servicio 03</span>
-          <h3>Adopción de IA</h3>
-          <p>Acompañamos a los equipos a transformar su forma de trabajar con IA: qué usar, cómo y con qué reglas.</p>
-          <a href="#contacto" class="service__link">Preparar a mi equipo →</a>
-        </article>
+      <div class="aperture" id="aperture">
+        <div class="aperture__art">
+          <span class="q q--r"><em>Valores</em></span>
+          <span class="q q--y"><em>Clima</em></span>
+          <span class="q q--b"><em>IA</em></span>
+          <span class="q q--g"><em>Plan</em></span>
+          <span class="aperture__bg">BG</span>
+        </div>
       </div>
-    </div>
-  </section>
+      </div>
+      <div class="words__copy">
+        <p class="eyebrow">02 — Qué hacemos</p>
+        <h2 class="h2" id="wordsTitle">Cultura, líderes, <em>IA.</em></h2>
+        <p class="body">Tres frentes que se tocan entre sí. Por eso los miramos juntos: no hay clima que mejore con líderes que no delegan, ni IA que funcione en una cultura que no la acompaña.</p>
+      </div>
+    </section>
 
-  <!-- MÉTODO -->
-  <section class="section section--tint" id="metodo">
-    <div class="wrap">
-      <p class="eyebrow eyebrow--navy reveal">02 · Cómo trabajamos</p>
-      <h2 class="h2 reveal">Del diagnóstico al plan<br>de acción.</h2>
-      <ol class="steps">
-        <li class="step reveal"><span class="step__n n-red">01</span><h3>Diagnosticar</h3><p>Encuestas, entrevistas y observación para entender la realidad de la organización.</p></li>
-        <li class="step reveal"><span class="step__n n-yellow">02</span><h3>Priorizar</h3><p>Elegimos las dos o tres acciones con más impacto, con responsables claros.</p></li>
-        <li class="step reveal"><span class="step__n n-sky">03</span><h3>Accionar</h3><p>Talleres, rituales y cambios de proceso que tu equipo puede sostener.</p></li>
-        <li class="step reveal"><span class="step__n n-green">04</span><h3>Medir</h3><p>Seguimiento con indicadores acordados al inicio, para ajustar el rumbo a tiempo.</p></li>
+    <!-- 3 · TRES FRENTES -->
+    <section class="scene worlds" id="servicios" data-level="0.42" aria-labelledby="worldsTitle">
+      <header class="worlds__head">
+        <p class="eyebrow">03 — Tres frentes</p>
+        <h2 class="h2" id="worldsTitle">Un diagnóstico. <em>Tres frentes.</em></h2>
+      </header>
+
+      <ol class="worlds__list">
+        <li class="beat" data-beat="cultura">
+          <p class="beat__word beat__word--cultura" aria-hidden="true">Cultura</p>
+          <div class="beat__card">
+            <p class="beat__index">01 / 03</p>
+            <h3 class="beat__name">Diagnóstico <em>cultural</em></h3>
+            <p class="beat__text">Relevamos valores, prácticas y clima para ver qué se vive de verdad en la organización y qué quedó solo escrito.</p>
+            <p class="beat__notes">Encuestas · Entrevistas · Observación</p>
+            <button type="button" class="choose" data-choose="cultura" aria-pressed="false"><span>Es lo que necesitamos</span></button>
+          </div>
+        </li>
+        <li class="beat" data-beat="liderazgo">
+          <p class="beat__word beat__word--liderazgo" aria-hidden="true">Liderazgo</p>
+          <div class="beat__card">
+            <p class="beat__index">02 / 03</p>
+            <h3 class="beat__name">Liderazgo <em>y delegación</em></h3>
+            <p class="beat__text">Entrenamos a líderes para delegar con confianza, sin microgestionar, y para sostener conversaciones difíciles.</p>
+            <p class="beat__notes">Talleres · Mentorías · Conversaciones difíciles</p>
+            <button type="button" class="choose" data-choose="liderazgo" aria-pressed="false"><span>Es lo que necesitamos</span></button>
+          </div>
+        </li>
+        <li class="beat" data-beat="ia">
+          <p class="beat__word beat__word--ia" aria-hidden="true">IA</p>
+          <div class="beat__card">
+            <p class="beat__index">03 / 03</p>
+            <h3 class="beat__name">Adopción <em>de IA</em></h3>
+            <p class="beat__text">Acompañamos a los equipos a transformar su forma de trabajar con IA: qué usar, cómo y con qué reglas.</p>
+            <p class="beat__notes">Herramientas · Casos de uso · Reglas claras</p>
+            <button type="button" class="choose" data-choose="ia" aria-pressed="false"><span>Es lo que necesitamos</span></button>
+          </div>
+        </li>
       </ol>
-    </div>
-  </section>
+    </section>
 
-  <!-- CASOS -->
-  <section class="section" id="casos">
-    <div class="wrap">
-      <p class="eyebrow eyebrow--red reveal">03 · Casos</p>
-      <h2 class="h2 reveal">Resultados que se<br>pueden medir.</h2>
-      <div class="cases">
-        <article class="case case--navy reveal">
-          <span class="case__tag">[Sector del cliente]</span>
+    <!-- 4 · MÉTODO -->
+    <section class="scene method" id="metodo" data-level="0.2" data-world-override="metodo" aria-labelledby="methodTitle">
+      <p class="eyebrow">04 — Cómo trabajamos</p>
+      <h2 class="h2" id="methodTitle">Del diagnóstico <em>al plan de acción.</em></h2>
+      <ol class="steps">
+        <li class="step rv"><span class="step__n">01</span><h3>Diagnosticar</h3><p>Encuestas, entrevistas y observación para entender la realidad de la organización.</p></li>
+        <li class="step rv"><span class="step__n">02</span><h3>Priorizar</h3><p>Elegimos las dos o tres acciones con más impacto, con responsables claros.</p></li>
+        <li class="step rv"><span class="step__n">03</span><h3>Accionar</h3><p>Talleres, rituales y cambios de proceso que tu equipo puede sostener.</p></li>
+        <li class="step rv"><span class="step__n">04</span><h3>Medir</h3><p>Seguimiento con indicadores acordados al inicio, para ajustar el rumbo a tiempo.</p></li>
+      </ol>
+    </section>
+
+    <!-- 5 · CASOS -->
+    <section class="scene cases" id="casos" data-level="0.1" aria-labelledby="casesTitle">
+      <p class="eyebrow">05 — Casos</p>
+      <h2 class="h2" id="casesTitle">Resultados que <em>se pueden medir.</em></h2>
+      <div class="cases__list">
+        <article class="case case--r rv">
+          <p class="case__tag">[Sector del cliente]</p>
+          <p class="case__stat">+00<small>%</small></p>
           <h3>[Desafío en una frase]</h3>
-          <p class="case__stat">+00%</p>
           <p>[Resultado medido con dato real del cliente]</p>
         </article>
-        <article class="case case--yellow reveal">
-          <span class="case__tag">[Sector del cliente]</span>
+        <article class="case case--y rv">
+          <p class="case__tag">[Sector del cliente]</p>
+          <p class="case__stat">−00<small>%</small></p>
           <h3>[Desafío en una frase]</h3>
-          <p class="case__stat">-00%</p>
           <p>[Resultado medido con dato real del cliente]</p>
         </article>
-        <article class="case case--sky reveal">
-          <span class="case__tag">[Sector del cliente]</span>
+        <article class="case case--b rv">
+          <p class="case__tag">[Sector del cliente]</p>
+          <p class="case__stat">00<small>sem.</small></p>
           <h3>[Desafío en una frase]</h3>
-          <p class="case__stat">00 sem.</p>
           <p>[Resultado medido con dato real del cliente]</p>
         </article>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- EQUIPO -->
-  <section class="section section--tint" id="equipo">
-    <div class="wrap team">
-      <div class="team__copy">
-        <p class="eyebrow eyebrow--red reveal">04 · Equipo</p>
-        <h2 class="h2 h2--xl reveal">#SomosBG</h2>
-        <p class="reveal">[Texto breve sobre quiénes son, su experiencia y cómo trabajan con las empresas.]</p>
-        <p class="team__names reveal">[Nombre], [cargo] · [Nombre], [cargo]</p>
-      </div>
+    <!-- 6 · EQUIPO -->
+    <section class="scene team" id="equipo" data-level="0" aria-labelledby="teamTitle">
       <div class="team__photos">
-        <figure class="photo reveal"><span>[Foto del equipo 1]</span><figcaption><b>[Nombre]</b>[Cargo]</figcaption></figure>
-        <figure class="photo photo--offset reveal"><span>[Foto del equipo 2]</span><figcaption><b>[Nombre]</b>[Cargo]</figcaption></figure>
+        <figure class="photo photo--1"><span>[Foto del equipo 1]</span></figure>
+        <figure class="photo photo--2"><span>[Foto del equipo 2]</span></figure>
       </div>
-    </div>
-  </section>
+      <div class="team__copy">
+        <p class="eyebrow">06 — Equipo</p>
+        <h2 class="h2" id="teamTitle"><em>#SomosBG</em></h2>
+        <p class="body">[Texto breve sobre quiénes son, su experiencia y cómo trabajan con las empresas.]</p>
+        <p class="team__names">[Nombre], [cargo] · [Nombre], [cargo]</p>
+      </div>
+    </section>
 
-  <!-- CITA -->
-  <section class="section quote">
-    <div class="wrap wrap--narrow">
-      <blockquote class="reveal">
-        <p>“[Cita de un cliente sobre el trabajo realizado.]”</p>
+    <!-- 7 · CITA -->
+    <section class="scene quote" id="cita" data-level="0.12">
+      <blockquote class="rv">
+        <p>“[Cita de un cliente sobre <em>el trabajo realizado.</em>]”</p>
         <cite>[Nombre del cliente], [cargo y empresa]</cite>
       </blockquote>
-    </div>
-  </section>
+    </section>
 
-  <!-- CONTACTO -->
-  <section class="cta" id="contacto">
-    <div class="wrap cta__grid">
-      <div>
-        <p class="eyebrow eyebrow--yellow reveal">05 · Contacto</p>
-        <h2 class="h2 h2--light reveal">Empecemos por <span class="yellow">el diagnóstico.</span></h2>
-        <p class="cta__lead reveal">Contanos dónde está hoy tu equipo y te proponemos un primer paso concreto. Respondemos en menos de 48 horas.</p>
-        <ul class="cta__list reveal">
-          <li><i class="dot r"></i>Primera reunión sin costo</li>
-          <li><i class="dot y"></i>Propuesta a medida en una semana</li>
-          <li><i class="dot g"></i>Indicadores acordados desde el inicio</li>
-        </ul>
+    <!-- 8 · TU PRIMER PASO -->
+    <section class="scene pick" id="contacto" data-level="0.22" aria-labelledby="pickTitle">
+      <div class="pick__head">
+        <p class="eyebrow">07 — Tu primer paso</p>
+        <h2 class="h2" id="pickTitle">Tu primer paso es
+          <span class="pick__name">
+            <span class="w" data-w="cultura">un diagnóstico cultural.</span>
+            <span class="w" data-w="liderazgo">liderar sin microgestionar.</span>
+            <span class="w" data-w="ia">una IA con reglas claras.</span>
+          </span>
+        </h2>
       </div>
-      <form class="form reveal" id="form">
-        <label>Nombre<input name="nombre" required autocomplete="name"></label>
-        <label>Empresa<input name="empresa" autocomplete="organization"></label>
-        <label>Email<input type="email" name="email" required autocomplete="email"></label>
-        <label>¿Qué te gustaría trabajar?
-          <select name="tema">
-            <option>Diagnóstico cultural</option>
-            <option>Liderazgo y delegación</option>
-            <option>Adopción de IA</option>
-            <option>Todavía no lo sé</option>
-          </select>
-        </label>
-        <label>Mensaje<textarea name="mensaje" rows="3"></textarea></label>
-        <button class="btn btn--yellow btn--block" type="submit">Pedir diagnóstico</button>
-        <p class="form__ok" id="ok" hidden>¡Gracias! Te escribimos a la brevedad.</p>
+
+      <div class="pick__options" role="radiogroup" aria-label="Elegí por dónde empezar">
+        <button type="button" role="radio" class="option" data-world="cultura" aria-checked="true"><span class="option__chip"></span><span class="option__name">Diagnóstico cultural</span><span class="option__note">Valores, prácticas y clima</span></button>
+        <button type="button" role="radio" class="option" data-world="liderazgo" aria-checked="false" tabindex="-1"><span class="option__chip"></span><span class="option__name">Liderazgo y delegación</span><span class="option__note">Delegar con confianza</span></button>
+        <button type="button" role="radio" class="option" data-world="ia" aria-checked="false" tabindex="-1"><span class="option__chip"></span><span class="option__name">Adopción de IA</span><span class="option__note">Qué usar, cómo y con qué reglas</span></button>
+      </div>
+
+      <form class="form" id="form" novalidate>
+        <input type="hidden" name="frente" id="frente" value="cultura">
+        <label class="field"><span>Nombre</span><input name="nombre" required autocomplete="name"></label>
+        <label class="field"><span>Empresa</span><input name="empresa" autocomplete="organization"></label>
+        <label class="field"><span>Email</span><input type="email" name="email" required autocomplete="email"></label>
+        <label class="field field--wide"><span>Contanos dónde está hoy tu equipo</span><textarea name="mensaje" rows="2"></textarea></label>
+        <div class="form__action">
+          <button class="cta" type="submit">
+            <span class="cta__fill" aria-hidden="true"></span>
+            <span class="cta__label">Pedir diagnóstico</span>
+            <span class="cta__arrow" aria-hidden="true">↗</span>
+          </button>
+          <p class="form__hint" id="formHint">Primera reunión sin costo. Respondemos en menos de 48 horas.</p>
+        </div>
       </form>
-    </div>
-  </section>
-</main>
+    </section>
 
-<footer class="footer">
-  <div class="wrap footer__inner">
-    <a href="#top" class="logo logo--light">
-      <span class="logo__mark"><i class="r"></i><i class="y"></i><i class="b"></i><i class="g"></i></span>
-      <span class="logo__text">BG<small>consultora</small></span>
-    </a>
-    <nav class="footer__links">
-      <a href="#servicios">Qué hacemos</a>
-      <a href="#metodo">Cómo trabajamos</a>
-      <a href="#casos">Casos</a>
-      <a href="#equipo">Equipo</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
-    <p class="footer__copy">© <span id="y"></span> BG Consultora · Cultura y liderazgo</p>
-  </div>
-</footer>
-
-<script src="main.js"></script>
+    <footer class="footer" data-level="0.18">
+      <p class="footer__brand" aria-hidden="true">BG<span>consultora</span></p>
+      <div class="footer__row">
+        <nav class="footer__links" aria-label="Pie de página">
+          <a href="#servicios">Qué hacemos</a>
+          <a href="#metodo">Cómo trabajamos</a>
+          <a href="#casos">Casos</a>
+          <a href="#equipo">Equipo</a>
+          <a href="#contacto">Contacto</a>
+        </nav>
+        <p class="footer__legal">© <span id="year">2026</span> BG Consultora · Cultura y liderazgo</p>
+      </div>
+    </footer>
+  </main>
 </body>
 </html>

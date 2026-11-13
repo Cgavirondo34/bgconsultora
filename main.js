@@ -13,7 +13,7 @@
 
   var WORLDS = ["cultura", "liderazgo", "ia"];
   var THEME = { cultura: "#fff6da", liderazgo: "#fdeceb", ia: "#e9f5fd", metodo: "#e8f6ee" };
-  var LABEL = { cultura: "Diagnóstico cultural", liderazgo: "Liderazgo y delegación", ia: "Adopción de IA" };
+  var LABEL = { cultura: "Diagnóstico cultural", liderazgo: "Coaching de liderazgo", ia: "Adopción de IA" };
 
   /* ---------------------------------------------------------------
      Mundos
@@ -169,6 +169,31 @@
   var servicios = document.getElementById("servicios");
   var stage = document.getElementById("stage");
   var gaugeFill = document.getElementById("gaugeFill");
+  var mbar = document.getElementById("mbar");
+  var contacto = document.getElementById("contacto");
+  var menu = document.getElementById("menu");
+  var menuToggle = document.getElementById("menuToggle");
+
+  /* menú en celular */
+  function setMenu(open) {
+    menu.classList.toggle("is-open", open);
+    menuToggle.setAttribute("aria-expanded", open);
+    menuToggle.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú");
+  }
+  menuToggle.addEventListener("click", function () { setMenu(!menu.classList.contains("is-open")); });
+  menu.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && menu.classList.contains("is-open")) { setMenu(false); menuToggle.focus(); }
+  });
+
+  /* WhatsApp: se muestra sólo si hay número cargado en <body data-whatsapp> */
+  var waNumber = (document.body.getAttribute("data-whatsapp") || "").replace(/\D/g, "");
+  if (waNumber) {
+    var waHref = "https://wa.me/" + waNumber + "?text=" + encodeURIComponent("Hola BG, quiero consultar por coaching para mi empresa.");
+    document.querySelectorAll("[data-wa]").forEach(function (a) {
+      a.href = waHref; a.target = "_blank"; a.rel = "noopener"; a.hidden = false;
+    });
+  }
 
   function contains(el, y) { var r = el.getBoundingClientRect(); return r.top <= y && r.bottom > y; }
 
@@ -183,6 +208,10 @@
     }
     if (ov !== state.override) { state.override = ov; applyWorld(); }
     stage.classList.toggle("is-focus", contains(servicios, mid));
+    if (mbar) mbar.classList.toggle("is-hidden",
+      heroCtas.getBoundingClientRect().bottom > 0 ||
+      contacto.getBoundingClientRect().top < window.innerHeight * 0.9 ||
+      menu.classList.contains("is-open"));
 
     var max = document.documentElement.scrollHeight - window.innerHeight;
     rigFrame();
@@ -194,12 +223,25 @@
      (x, y en px · r, ry en grados · s escala · o opacidad)
      --------------------------------------------------------------- */
   var rig = document.getElementById("rig");
+  var mark = document.getElementById("mark");
+  var heroSub = document.querySelector(".hero__sub");
+  var heroMeta = document.querySelector(".hero__meta");
+  var heroCtas = document.querySelector(".hero__ctas");
   var rigCur = null;
   function docTop(id) { return document.getElementById(id).getBoundingClientRect().top + window.scrollY; }
   function lerp(a, b, t) { return a + (b - a) * t; }
   function rigKeys() {
     var W = window.innerWidth, H = window.innerHeight, d = W > 900;
-    var S0 = { x: d ? W * 0.21 : 0, y: d ? H * 0.04 : H * 0.05, r: -6, ry: 0, s: d ? 1 : 0.78, o: 1 };
+    var S0 = { x: W * 0.21, y: H * 0.04, r: -6, ry: 0, s: 1, o: 1 };
+    if (!d) {
+      // en celular la marca va en el hueco entre el subtítulo y el texto de la portada
+      var sub = heroSub.getBoundingClientRect().bottom + window.scrollY;
+      var meta = heroMeta.getBoundingClientRect().top + window.scrollY;
+      var size = mark.offsetWidth || 240;
+      var room = meta - sub - 24;
+      var sc = Math.max(0.3, Math.min(0.78, room / size));
+      S0 = { x: 0, y: (sub + meta) / 2 - H / 2, r: -6, ry: 0, s: sc, o: room > 70 ? 1 : 0 };
+    }
     var S1 = { x: 0, y: d ? 0 : -H * 0.17, r: 0, ry: 360, s: d ? 0.9 : 0.8, o: 1 };
     var S2 = { x: 0, y: -H * 0.3, r: 0, ry: 360, s: 0.4, o: 0 };
     var S3in = { x: d ? -W * 0.22 : 0, y: H * 0.4, r: 8, ry: 360, s: 0.6, o: 0 };
@@ -342,10 +384,12 @@
 
   function runLoader() {
     var fontsReady = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-    var minTime = reduce ? 0 : 1400;
+    var seen = false;
+    try { seen = sessionStorage.getItem("bg-seen") === "1"; sessionStorage.setItem("bg-seen", "1"); } catch (e) {}
+    var minTime = reduce || seen ? 0 : 500;
     var start = performance.now();
     var done = false;
-    Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 2500); })]).then(function () { done = true; });
+    Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 900); })]).then(function () { done = true; });
     (function tick(now) {
       var p = Math.min(1, (now - start) / minTime || 1);
       if (!done) p = Math.min(p, 0.9);
@@ -354,7 +398,7 @@
       fill.style.height = eased * 100 + "%";
       if (p >= 1 && done) {
         if (hasGsap) ScrollTrigger.refresh();
-        setTimeout(intro, 150);
+        setTimeout(intro, minTime ? 100 : 0);
       } else requestAnimationFrame(tick);
     })(start);
   }
@@ -364,21 +408,40 @@
      --------------------------------------------------------------- */
   var form = document.getElementById("form");
   var hint = document.getElementById("formHint");
+  var submitBtn = form.querySelector('button[type="submit"]');
+  function setHint(msg, kind) {
+    hint.textContent = msg;
+    hint.classList.toggle("is-ok", kind === "ok");
+    hint.classList.toggle("is-error", kind === "error");
+  }
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var ok = true;
     form.querySelectorAll("[required]").forEach(function (f) {
       var bad = !f.value.trim() || (f.type === "email" && !/^\S+@\S+\.\S+$/.test(f.value));
       f.classList.toggle("is-invalid", bad);
+      f.setAttribute("aria-invalid", bad);
       if (bad && ok) { f.focus(); ok = false; }
     });
-    if (!ok) { hint.textContent = "Completá nombre y un email válido."; hint.classList.remove("is-ok"); return; }
-    // TODO: enviar a un backend / Formspree / email. Por ahora sólo confirma.
-    hint.textContent = "¡Gracias! Te escribimos a la brevedad por " + LABEL[frenteInput.value] + ".";
-    hint.classList.add("is-ok");
-    form.reset();
-    frenteInput.value = state.chosen;
-    liquid.kick(1.2);
+    if (!ok) { setHint("Completá tu nombre y un email válido.", "error"); return; }
+
+    submitBtn.disabled = true;
+    setHint("Enviando…");
+    var body = new URLSearchParams(new FormData(form)).toString();
+    fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.status);
+        setHint("¡Gracias! Recibimos tu consulta sobre " + LABEL[frenteInput.value] + ". Te vamos a contactar a la brevedad.", "ok");
+        form.reset();
+        frenteInput.value = state.chosen;
+        liquid.kick(1.2);
+      })
+      .catch(function () {
+        setHint(waNumber
+          ? "No pudimos enviar la consulta. Probá de nuevo o escribinos por WhatsApp."
+          : "No pudimos enviar la consulta. Probá de nuevo en unos minutos.", "error");
+      })
+      .then(function () { submitBtn.disabled = false; });
   });
 
   document.getElementById("year").textContent = new Date().getFullYear();

@@ -373,3 +373,6 @@ main { position: relative; z-index: 3; }
   .rv { opacity: 1; transform: none; transition: none; }
   .hero__cue-line { animation: none; }
 }
+
+/* Oculta el sello "Powered by Netlify" que Netlify inyecta al servir el sitio */
+#nl-badge-frame, iframe[id^="nl-badge"] { display: none !important; visibility: hidden !important; }
